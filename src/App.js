@@ -1,24 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import GithubFinderNavbar from './components/layouts/GithubFinderNavbar';
+import GithubFinderFooter from './components/layouts/GithubFinderFooter';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import NotFound from './pages/NotFound';
+import { GithubProvider } from './components/context/github/GithubContext';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <GithubProvider>
+        <div className='flex flex-col justify-between h-screen'>
+          <GithubFinderNavbar />
+
+          <main className='container mx-auto px-3 pb-12'>
+            <Routes>
+              <Route path='/' element={<HomePage />} />
+              <Route path='/about' element={<AboutPage />} />
+              <Route path='/notfound' element={<NotFound />} />
+              <Route path='/*' element={<NotFound />} />
+            </Routes>
+          </main>
+
+          <GithubFinderFooter />
+        </div>
+      </GithubProvider>
+    </BrowserRouter>
   );
 }
 
