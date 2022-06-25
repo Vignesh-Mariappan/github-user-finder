@@ -1,11 +1,14 @@
 import { createContext, useReducer } from 'react';
 import { githubReducer } from './GithubReducer';
+import { useNavigate } from 'react-router-dom';
 
 // @ts-ignore
 // create the github context
 const GithubContext = createContext();
 
 export const GithubProvider = ({ children }) => {
+  let navigate = useNavigate();
+
   // set the initial state
   let initialState = {
     users: [],
@@ -27,23 +30,36 @@ export const GithubProvider = ({ children }) => {
     });
 
     setTimeout(async () => {
-      const response = await fetch(`${process.env.REACT_APP_GITHUB_API_URL}/search/users?${params}`, {
-        headers: {
-          Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
-        },
-      });
+      try {
+        const response = await fetch(`${process.env.REACT_APP_GITHUB_API_URL}/search/users?${params}`, {
+          headers: {
+            Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+          },
+        });
 
-      const userResultsData = await response.json();
+        if (Math.trunc(response.status / 100) > 3) {
+          throw new Error('Github API call failed');
+        }
 
-      // @ts-ignore
-      // dispatch function is called and action object is passed, it will inturn call the github reducer function and pass the state and action object to it
-      dispatch({
-        type: 'GET_USERS',
-        payload: {
-          userResultsData: userResultsData.items,
-          loading: false,
-        },
-      });
+        const userResultsData = await response.json();
+
+        // @ts-ignore
+        // dispatch function is called and action object is passed, it will inturn call the github reducer function and pass the state and action object to it
+        dispatch({
+          type: 'GET_USERS',
+          payload: {
+            userResultsData: userResultsData.items,
+            loading: false,
+          },
+        });
+      } catch (error) {
+        navigate('/notfound');
+        // @ts-ignore
+        dispatch({
+          type: 'CLEAR_USERS',
+          payload: initialState,
+        });
+      }
     }, 2000);
   };
 
